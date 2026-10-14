@@ -97,3 +97,18 @@ Termux ne fournit pas de service système natif à un utilisateur non-root ; les
 ## Compatibilité serveur
 
 Le payload est identique à celui de l'agent Windows (mêmes champs `guid`, `hostname`, `memory`, `disks`, `network_interfaces`, `cpu`, ...) plus un champ `battery` spécifique à Android et `os_details` contenant les propriétés Android. Le champ Android est simplement ignoré côté serveur si non pris en charge.
+
+## Application Android native (APK)
+
+En plus du mode Termux, l'agent est disponible en **APK autonome** (code Python partagé, UI Kivy, service en arrière-plan), pour une installation simple sans manipulation technique :
+
+1. Télécharger l'APK depuis la page **Actions** du dépôt (workflow « Build Android APK » → dernière exécution → artifact `dolibarr-sysinfo-agent-apk`).
+2. Installer l'APK sur l'appareil (autoriser « sources inconnues »).
+3. Ouvrir l'application et renseigner :
+   - l'URL Dolibarr (ex. `https://dolibarr.example.com`) ;
+   - le **code d'enrôlement** à usage unique généré sur la fiche tiers Dolibarr.
+4. Taper « Enrôler l'appareil » : la clé API est récupérée et stockée chiffrée (AES-GCM lié à l'appareil). « Envoyer maintenant » force un premier rapport ; « Tester la connexion » vérifie l'accès à l'API.
+
+L'envoi périodique est assuré par le service embarqué `sysinfo` (`service.py`) : il démarre au boot de l'appareil et envoie un rapport toutes les `poll_interval_seconds` (par défaut 4 h). Sur Android moderne, exempter l'app de l'optimisation de batterie (une invite s'affiche) pour un envoi fiable.
+
+Le build APK utilise [Buildozer](https://buildozer.readthedocs.io) (`buildozer.spec`) et est automatisé par GitHub Actions (`.github/workflows/build-apk.yml`) : chaque push reconstruit l'APK et le publie en artifact. Le payload envoyé est strictement identique à celui de l'agent Termux/Windows.
