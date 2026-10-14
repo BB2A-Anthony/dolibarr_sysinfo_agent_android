@@ -56,7 +56,7 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           REPO: ${{ github.repository }}
         run: |
-          SUMMARY=$(grep -iE 'error:|exception|failed|Traceback|Cwd' build.log | tail -n 15 | tr '\n' ' ' | cut -c1-2000)
+          SUMMARY=$(grep -iE 'error|exception|fail|traceback|not found|no such|refused|denied|invalid|unable|cannot' build.log | grep -viE 'Cwd|warnings?' | tail -n 20 | tr '\n' ' ' | cut -c1-3000)
           gh pr comment ${PR_NUMBER} --repo ${REPO} --body "Build failed. Cause: $SUMMARY" || true
 
       - name: Upload APK artifact
