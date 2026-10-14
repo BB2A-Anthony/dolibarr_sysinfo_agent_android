@@ -18,6 +18,8 @@ android.permissions = INTERNET,ACCESS_NETWORK_STATE,RECEIVE_BOOT_COMPLETED,FOREG
 android.api = 34
 android.minapi = 24
 android.ndk = 26
+android.accept_sdk_license = True
+android.antialias = False
 
 services = sysinfo:service.py
 
