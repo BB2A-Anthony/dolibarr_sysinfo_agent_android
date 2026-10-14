@@ -1,0 +1,7 @@
+{
+    "api_url": "https://dolibarr.example.com",
+    "initial_delay_seconds": 30,
+    "poll_interval_seconds": 14400,
+    "timeout_seconds": 30,
+    "verify_ssl": true
+}
