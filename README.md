@@ -2,6 +2,21 @@
 
 Agent Python qui collecte les informations système d'un appareil Android et les envoie périodiquement à l'API du module Dolibarr `systeminfo` (même protocole que l'agent Windows). Il fonctionne sous [Termux](https://termux.dev), sans root.
 
+## Versions minimales et maximales
+
+| Composant | Version minimale | Version maximale (testée) | Notes |
+|---|---|---|---|
+| Android | 7.0 (API 24) | 15 (API 35) | Termux cesse officiellement de supporter Android < 7 ; certaines commandes `getprop` peuvent être restreintes sur Android ≥ 13 sans shell complet |
+| Termux | 0.118 (F-Droid) | 0.118.x | La version Play Store est obsolète, utiliser [F-Droid](https://f-droid.org/packages/com.termux/) ou GitHub |
+| Termux:API | 0.50 | 0.50.x | Pour la batterie via `termux-battery-status` (optionnel) |
+| Python | 3.9 | 3.13 | `pkg install python` sous Termux fournit une version dans cet intervalle ; les constructions `python` et `python-pt3` de Termux conviennent |
+| requests | 2.31.0 | 2.32.x | Dépendance HTTP |
+| psutil | 5.9.0 | 6.1.x | CPU, mémoire, disques, réseau ; compatible Termux sans root |
+| cryptography | 41.0.0 | 44.x | Chiffrement AES-GCM de la clé API ; en dessous de 41, l'agent retombe sur un stockage en clair de la clé |
+| Module Dolibarr `systeminfo` | identique à l'agent Windows (`dolibarr_sysinfo_agent_windows/server_module`) | — | Aucune modification serveur requise |
+
+Les versions au-dessus de la version maximale indiquée ne sont pas testées : l'agent devrait fonctionner, mais sans garantie. En cas d'incompatibilité, se référer aux [issues du dépôt](https://github.com/BB2A-Anthony/dolibarr_sysinfo_agent_android/issues).
+
 ## Informations collectées
 
 - Hostname, FQDN, architecture, processeur, version Python
