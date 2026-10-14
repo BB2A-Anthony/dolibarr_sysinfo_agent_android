@@ -48,11 +48,16 @@ jobs:
       - name: Build debug APK
         run: |
           set -o pipefail
-          buildozer android debug 2>&1 | tee build.log || {
-            SUMMARY=$(grep -iE 'error:|exception|failed|Traceback' build.log | tail -n 8 | tr '\n' ' ' | cut -c1-600)
-            echo "::error file=buildozer::BUILD FAILED: $SUMMARY"
-            exit 1
-          }
+          buildozer android debug 2>&1 | tee build.log
+      - name: Report failure cause on PR
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          SUMMARY=$(grep -iE 'error:|exception|failed|Traceback|Cwd' build.log | tail -n 15 | tr '\n' ' ' | cut -c1-2000)
+          gh pr comment ${PR_NUMBER} --repo ${REPO} --body "Build failed. Cause: $SUMMARY" || true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
