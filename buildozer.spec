@@ -23,6 +23,10 @@ android.antialias = False
 
 services = sysinfo:service.py
 
+# Pre-patched p4a clone (pins pip 24.0 in the build venv, avoids
+# the open_rich_spinner ImportError during venv creation)
+p4a.source_dir = /tmp/p4a
+
 # Presplash / icon (optional files)
 #android.presplash_filename = presplash.png
 #android.icon_filename = icon.png
@@ -36,6 +40,3 @@ warn_on_root = 1
 #debug = debug
 #release = False
 
-# Use the pre-patched p4a clone (pins pip 24.0 in build venv,
-# avoids the open_rich_spinner ImportError in p4a's venv creation)
-p4a.source_dir = /tmp/p4a
