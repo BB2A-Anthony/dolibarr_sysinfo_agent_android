@@ -45,13 +45,12 @@ jobs:
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-${{ runner.os }}-
 
-      - name: Pre-create p4a venv with pip 24.0
+      - name: Patch p4a to keep pip 24.0 in build venv (open_rich_spinner bug)
         run: |
-          VENV=.buildozer/android/platform/build-arm64-v8a_armeabi-v7a/build/venv
-          rm -rf "$VENV"
-          mkdir -p "$(dirname "$VENV")"
-          python -m virtualenv --pip 24.0 "$VENV"
-          "$VENV/bin/pip" --version
+          P4A_BUILD=$(python -c 'import pythonforandroid.build as b; import inspect; print(inspect.getsourcefile(b))')
+          grep -n "pip install -U pip" "$P4A_BUILD"
+          sed -i "s/pip install -U pip/pip install 'pip==24.0'/" "$P4A_BUILD"
+          grep -n "pip==24.0" "$P4A_BUILD"
 
       - name: Build debug APK
         run: |
