@@ -32,6 +32,12 @@ jobs:
             autoconf automake libtool pkg-config zip unzip ccache git \
             libffi-dev libssl-dev
 
+      - name: Clone and patch p4a (pin pip 24.0 in build venv)
+        run: |
+          git clone --depth 1 https://github.com/kivy/python-for-android.git /tmp/p4a
+          sed -i "s|pip install -U pip|pip install 'pip==24.0'|" /tmp/p4a/pythonforandroid/build.py
+          grep -n "pip==24.0" /tmp/p4a/pythonforandroid/build.py
+
       - name: Install buildozer
         run: |
           pip install buildozer cython 'virtualenv==20.25.1' 'pip==24.0'
@@ -44,22 +50,6 @@ jobs:
             .buildozer
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-${{ runner.os }}-
-
-      - name: Build debug APK (first pass installs p4a)
-        run: |
-          set -o pipefail
-          P4A_DIR=~/.buildozer/android/platform/python-for-android
-          if [ ! -d "$P4A_DIR" ]; then
-            buildozer android debug 2>&1 | tee build.log || true
-          fi
-
-      - name: Patch p4a to pin pip 24.0 in build venv (open_rich_spinner bug)
-        run: |
-          P4A_DIR=~/.buildozer/android/platform/python-for-android
-          P4A_BUILD=$P4A_DIR/pythonforandroid/build.py
-          ls "$P4A_BUILD"
-          sed -i "s|pip install -U pip|pip install 'pip==24.0'|" "$P4A_BUILD"
-          grep -n "pip==24.0" "$P4A_BUILD"
 
       - name: Build debug APK
         run: |
