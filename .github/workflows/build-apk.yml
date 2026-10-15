@@ -45,11 +45,20 @@ jobs:
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-${{ runner.os }}-
 
-      - name: Patch p4a to keep pip 24.0 in build venv (open_rich_spinner bug)
+      - name: Build debug APK (first pass: installs p4a)
         run: |
-          P4A_BUILD=$(python -c 'import pythonforandroid.build as b; import inspect; print(inspect.getsourcefile(b))')
-          grep -n "pip install -U pip" "$P4A_BUILD"
-          sed -i "s/pip install -U pip/pip install 'pip==24.0'/" "$P4A_BUILD"
+          set -o pipefail
+          P4A_DIR=~/.buildozer/android/platform/python-for-android
+          if [ ! -d "$P4A_DIR" ]; then
+            buildozer android debug 2>&1 | tee build.log || true
+          fi
+
+      - name: Patch p4a to pin pip 24.0 in build venv (open_rich_spinner bug)
+        run: |
+          P4A_DIR=~/.buildozer/android/platform/python-for-android
+          P4A_BUILD=$P4A_DIR/pythonforandroid/build.py
+          ls "$P4A_BUILD"
+          sed -i "s|pip install -U pip|pip install 'pip==24.0'|" "$P4A_BUILD"
           grep -n "pip==24.0" "$P4A_BUILD"
 
       - name: Build debug APK
