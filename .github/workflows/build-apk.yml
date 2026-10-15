@@ -34,7 +34,7 @@ jobs:
 
       - name: Install buildozer
         run: |
-          pip install buildozer cython 'pip==24.0'
+          pip install buildozer cython 'virtualenv==20.25.1' 'pip==24.0'
 
       - name: Cache buildozer
         uses: actions/cache@v4
@@ -42,7 +42,7 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v2
           restore-keys: buildozer-${{ runner.os }}-
 
       - name: Build debug APK
