@@ -51,6 +51,10 @@ jobs:
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-${{ runner.os }}-
 
+      - name: Clean stale build venv from cache (broken pip)
+        run: |
+          rm -rf .buildozer/android/platform/build-*/build/venv || true
+
       - name: Build debug APK
         run: |
           set -o pipefail
