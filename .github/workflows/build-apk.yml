@@ -51,8 +51,10 @@ jobs:
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-${{ runner.os }}-
 
-      - name: Clean stale build venv from cache (broken pip)
+      - name: Inspect and clean stale build venv from cache
         run: |
+          find .buildozer -maxdepth 6 -type d -name venv || true
+          find ~/.buildozer -maxdepth 6 -type d -name venv || true
           rm -rf .buildozer/android/platform/build-*/build/venv || true
 
       - name: Build debug APK
@@ -67,7 +69,9 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           REPO: ${{ github.repository }}
         run: |
+          grep -n "venv" build.log | tail -n 10 > /tmp/venv-ctx.txt || true
           SUMMARY=$(grep -iE 'error|exception|fail|traceback|not found|no such|refused|denied|invalid|unable|cannot' build.log | grep -viE 'Cwd|warnings?' | tail -n 20 | tr '\n' ' ' | cut -c1-3000)
+          SUMMARY="$SUMMARY || VENVCTX: $(cat /tmp/venv-ctx.txt | tr '\n' ' ' | cut -c1-800)"
           gh pr comment ${PR_NUMBER} --repo ${REPO} --body "Build failed. Cause: $SUMMARY" || true
 
       - name: Upload APK artifact
