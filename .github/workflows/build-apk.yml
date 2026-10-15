@@ -58,9 +58,6 @@ jobs:
               exit 1
             fi
           }
-        run: |
-          set -o pipefail
-          buildozer android debug 2>&1 | tee build.log
       - name: Report failure cause on PR
         if: failure()
         env:
