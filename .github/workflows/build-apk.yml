@@ -42,22 +42,14 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v2
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-${{ runner.os }}-
 
       - name: Build debug APK
         run: |
           set -o pipefail
-          buildozer android debug 2>&1 | tee build.log || {
-            VENV=.buildozer/android/platform/build-arm64-v8a_armeabi-v7a/build/venv
-            if grep -q 'open_rich_spinner' build.log && [ -d "$VENV" ]; then
-              echo "open_rich_spinner detected -> pinning pip 24.0 in p4a venv and retrying"
-              "$VENV/bin/python" -m pip install 'pip==24.0'
-              buildozer android debug 2>&1 | tee -a build.log
-            else
-              exit 1
-            fi
-          }
+          rm -rf .buildozer/android/platform/build-arm64-v8a_armeabi-v7a/build/venv
+          buildozer android debug 2>&1 | tee build.log
       - name: Report failure cause on PR
         if: failure()
         env:
