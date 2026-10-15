@@ -45,7 +45,7 @@ jobs:
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
           restore-keys: buildozer-${{ runner.os }}-
 
-      - name: Build debug APK (first pass: installs p4a)
+      - name: Build debug APK (first pass installs p4a)
         run: |
           set -o pipefail
           P4A_DIR=~/.buildozer/android/platform/python-for-android
@@ -65,6 +65,7 @@ jobs:
         run: |
           set -o pipefail
           buildozer android debug 2>&1 | tee build.log
+
       - name: Report failure cause on PR
         if: failure()
         env:
