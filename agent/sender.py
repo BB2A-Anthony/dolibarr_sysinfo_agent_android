@@ -1,7 +1,7 @@
 """HTTP layer: config loading, auth headers, enrollment, reporting.
 
 Kept protocol-compatible with the Windows agent so the same Dolibarr
-module (systeminfo) accepts both agents.
+module (sysinfo) accepts both agents.
 """
 
 import json
@@ -19,7 +19,7 @@ logger = logging.getLogger("agent.sender")
 
 DOLIBARR_STATUS_PATH = "/status"
 DOLIBARR_API_ROOT = "/api/index.php"
-ENDPOINT_PATH = "/systeminfo/machine"
+ENDPOINT_PATH = "/sysinfo/machine"
 
 
 def load_config(path):
@@ -85,7 +85,7 @@ def enroll_soc(config, code, config_path, confirm_reassign=False):
     base = config["api_url"].rstrip("/")
     if "/api/index.php" in base:
         base = base.split("/api/index.php")[0]
-    url = base + "/custom/systeminfo/enroll_soc.php"
+    url = base + "/custom/sysinfo/enroll_soc.php"
     try:
         resp = requests.post(
             url,
@@ -177,7 +177,7 @@ def send_report(config):
     )
     if resp.status_code == 404:
         logger.warning(
-            "Endpoint %s introuvable : le module Dolibarr 'systeminfo' "
+            "Endpoint %s introuvable : le module Dolibarr 'sysinfo' "
             "doit etre installe cote serveur.", url
         )
     resp.raise_for_status()
