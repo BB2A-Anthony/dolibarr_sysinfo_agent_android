@@ -60,6 +60,15 @@ Les versions au-dessus de la version maximale indiquée ne sont pas testées : l
    | `guid` | Identifiant de l'appareil, généré automatiquement (numéro de série Android) — ne se configure normalement pas |
    | `api_key` / `api_key_encrypted` | Clé API Dolibarr (chiffrée automatiquement en AES-GCM lié à l'appareil) |
    | `poll_interval_seconds` | Intervalle entre deux envois (par défaut 14400 s = 4 h) |
+   | `auto_update` | Mise à jour automatique activée (par défaut true, voir ci-dessous) |
+
+## Mise à jour automatique
+
+L'agent vérifie sa version après chaque envoi de rapport en interrogeant le module Dolibarr `systeminfo` (`GET /api/index.php/sysinfo/config`), qui expose la dernière version disponible et l'URL du dossier de mise à jour sur GitHub (`releases/download/<version>/update/`). Si la version distante est plus récente, l'APK `dolibarr_sysinfo_agent.apk` est téléchargé ; sur Android une application ne peut pas se remplacer elle-même silencieusement, l'installation doit donc être confirmée par l'utilisateur (bouton « Vérifier la mise à jour » de l'UI, ou intent système lancé au moment du téléchargement).
+
+Pour désactiver ce comportement : `"auto_update": false` dans `config.json`.
+
+Côté serveur, la version publiée se règle dans le descripteur du module (`agentAndroidVersion` / `agentAndroidUpdateUrl`) ou via les constantes `SYSINFO_AGENT_ANDROID_VERSION` / `SYSINFO_AGENT_ANDROID_UPDATE_URL`.
 
 ## Utilisation
 
