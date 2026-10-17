@@ -1,0 +1,82 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            autoconf automake libtool pkg-config zip unzip ccache git \
+            libffi-dev libssl-dev
+
+      - name: Clone and patch p4a (pin pip 24.0 in build venv)
+        run: |
+          git clone --depth 1 https://github.com/kivy/python-for-android.git /tmp/p4a
+          sed -i 's|"install", "-U", "pip", "wheel",|"install", "pip==24.0", "wheel",|' /tmp/p4a/pythonforandroid/pythonpackage.py
+          grep -n "pip==24.0" /tmp/p4a/pythonforandroid/pythonpackage.py
+
+      - name: Install buildozer
+        run: |
+          pip install buildozer cython 'virtualenv==20.25.1' 'pip==24.0'
+
+      - name: Cache buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v3
+          restore-keys: buildozer-${{ runner.os }}-
+
+      - name: Inspect and clean stale build venv from cache
+        run: |
+          find .buildozer -maxdepth 6 -type d -name venv || true
+          find ~/.buildozer -maxdepth 6 -type d -name venv || true
+          rm -rf .buildozer/android/platform/build-*/build/venv || true
+
+      - name: Build debug APK
+        run: |
+          set -o pipefail
+          buildozer android debug 2>&1 | tee build.log
+
+      - name: Report failure cause on PR
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          grep -n "venv" build.log | tail -n 10 > /tmp/venv-ctx.txt || true
+          SUMMARY=$(grep -iE 'error|exception|fail|traceback|not found|no such|refused|denied|invalid|unable|cannot' build.log | grep -viE 'Cwd|warnings?' | tail -n 20 | tr '\n' ' ' | cut -c1-3000)
+          SUMMARY="$SUMMARY || VENVCTX: $(cat /tmp/venv-ctx.txt | tr '\n' ' ' | cut -c1-800)"
+          gh pr comment ${PR_NUMBER} --repo ${REPO} --body "Build failed. Cause: $SUMMARY" || true
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dolibarr-sysinfo-agent-apk
+          path: bin/*.apk
+          retention-days: 90

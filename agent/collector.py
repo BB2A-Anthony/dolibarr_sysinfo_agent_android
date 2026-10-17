@@ -15,7 +15,10 @@ import socket
 import subprocess
 import time
 
-import psutil
+try:
+    import psutil
+except ImportError:
+    psutil = None
 import requests
 
 PUBLIC_IP_SERVICES = (
@@ -29,6 +32,9 @@ ISP_INFO_SERVICE = "https://ipinfo.io/json"
 
 def collect_system_info(config):
     """Collect Android system information to report to the API."""
+    if psutil is None:
+        from agent.mobile_collect import collect_system_info as _native
+        return _native(config)
     info = {
         "guid": config["guid"],
         "hostname": socket.gethostname(),
