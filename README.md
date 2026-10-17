@@ -1,6 +1,6 @@
 # Dolibarr Sysinfo Agent Android
 
-Agent Python qui collecte les informations système d'un appareil Android et les envoie périodiquement à l'API du module Dolibarr `systeminfo` (même protocole que l'agent Windows). Il fonctionne sous [Termux](https://termux.dev), sans root.
+Agent Python qui collecte les informations système d'un appareil Android et les envoie périodiquement à l'API du module Dolibarr `sysinfo` (même protocole que l'agent Windows). Il fonctionne sous [Termux](https://termux.dev), sans root.
 
 ## Versions minimales et maximales
 
@@ -13,7 +13,7 @@ Agent Python qui collecte les informations système d'un appareil Android et les
 | requests | 2.31.0 | 2.32.x | Dépendance HTTP |
 | psutil | 5.9.0 | 6.1.x | CPU, mémoire, disques, réseau ; compatible Termux sans root |
 | cryptography | 41.0.0 | 44.x | Chiffrement AES-GCM de la clé API ; en dessous de 41, l'agent retombe sur un stockage en clair de la clé |
-| Module Dolibarr `systeminfo` | identique à l'agent Windows (`dolibarr_sysinfo_agent_windows/server_module`) | — | Aucune modification serveur requise |
+| Module Dolibarr `sysinfo` | module Dolibarr [dolibarr_module_sysinfo](https://github.com/BB2A-Anthony/dolibarr_module_sysinfo) | — | Aucune modification serveur requise |
 
 Les versions au-dessus de la version maximale indiquée ne sont pas testées : l'agent devrait fonctionner, mais sans garantie. En cas d'incompatibilité, se référer aux [issues du dépôt](https://github.com/BB2A-Anthony/dolibarr_sysinfo_agent_android/issues).
 
@@ -56,7 +56,7 @@ Les versions au-dessus de la version maximale indiquée ne sont pas testées : l
 
    | Clé | Rôle |
    |---|---|
-   | `api_url` | URL de base du Dolibarr (l'agent ajoute `/api/index.php/systeminfo/machine`) |
+   | `api_url` | URL de base du Dolibarr (l'agent ajoute `/api/index.php/sysinfo/machine`) |
    | `guid` | Identifiant de l'appareil, généré automatiquement (numéro de série Android) — ne se configure normalement pas |
    | `api_key` / `api_key_encrypted` | Clé API Dolibarr (chiffrée automatiquement en AES-GCM lié à l'appareil) |
    | `poll_interval_seconds` | Intervalle entre deux envois (par défaut 14400 s = 4 h) |
@@ -64,7 +64,7 @@ Les versions au-dessus de la version maximale indiquée ne sont pas testées : l
 
 ## Mise à jour automatique
 
-L'agent vérifie sa version après chaque envoi de rapport en interrogeant le module Dolibarr `systeminfo` (`GET /api/index.php/sysinfo/config`), qui expose la dernière version disponible et l'URL du dossier de mise à jour sur GitHub (`releases/download/<version>/update/`). Si la version distante est plus récente, l'APK `dolibarr_sysinfo_agent.apk` est téléchargé ; sur Android une application ne peut pas se remplacer elle-même silencieusement, l'installation doit donc être confirmée par l'utilisateur (bouton « Vérifier la mise à jour » de l'UI, ou intent système lancé au moment du téléchargement).
+L'agent vérifie sa version après chaque envoi de rapport en interrogeant le module Dolibarr `sysinfo` (`GET /api/index.php/sysinfo/config`), qui expose la dernière version disponible et l'URL du dossier de mise à jour sur GitHub (`releases/download/<version>/update/`). Si la version distante est plus récente, l'APK `dolibarr_sysinfo_agent.apk` est téléchargé ; sur Android une application ne peut pas se remplacer elle-même silencieusement, l'installation doit donc être confirmée par l'utilisateur (bouton « Vérifier la mise à jour » de l'UI, ou intent système lancé au moment du téléchargement).
 
 Pour désactiver ce comportement : `"auto_update": false` dans `config.json`.
 
@@ -101,7 +101,7 @@ Termux ne fournit pas de service système natif à un utilisateur non-root ; les
 
 - La clé API est stockée chiffrée (AES-GCM, clé dérivée des propriétés matérielles de l'appareil via PBKDF2) : `config.json` ne contient jamais la clé en clair une fois migrée.
 - Si le paquet `cryptography` n'est pas installable, l'agent retombe sur un stockage en clair (équivalent à l'agent Windows hors DPAPI).
-- Le module serveur `systeminfo` côté Dolibarr est le même que pour l'agent Windows (voir `dolibarr_sysinfo_agent_windows/server_module`).
+- Le module serveur `sysinfo` côté Dolibarr est le même que pour l'agent Windows (voir le module [dolibarr_module_sysinfo](https://github.com/BB2A-Anthony/dolibarr_module_sysinfo)).
 
 ## Compatibilité serveur
 
