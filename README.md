@@ -13,7 +13,7 @@ Agent Python qui collecte les informations système d'un appareil Android et les
 | requests | 2.31.0 | 2.32.x | Dépendance HTTP |
 | psutil | 5.9.0 | 6.1.x | CPU, mémoire, disques, réseau ; compatible Termux sans root |
 | cryptography | 41.0.0 | 44.x | Chiffrement AES-GCM de la clé API ; en dessous de 41, l'agent retombe sur un stockage en clair de la clé |
-| Module Dolibarr `sysinfo` | identique à l'agent Windows (`dolibarr_sysinfo_agent_windows/server_module`) | — | Aucune modification serveur requise |
+| Module Dolibarr `sysinfo` | module Dolibarr [dolibarr_module_sysinfo](https://github.com/BB2A-Anthony/dolibarr_module_sysinfo) | — | Aucune modification serveur requise |
 
 Les versions au-dessus de la version maximale indiquée ne sont pas testées : l'agent devrait fonctionner, mais sans garantie. En cas d'incompatibilité, se référer aux [issues du dépôt](https://github.com/BB2A-Anthony/dolibarr_sysinfo_agent_android/issues).
 
@@ -101,7 +101,7 @@ Termux ne fournit pas de service système natif à un utilisateur non-root ; les
 
 - La clé API est stockée chiffrée (AES-GCM, clé dérivée des propriétés matérielles de l'appareil via PBKDF2) : `config.json` ne contient jamais la clé en clair une fois migrée.
 - Si le paquet `cryptography` n'est pas installable, l'agent retombe sur un stockage en clair (équivalent à l'agent Windows hors DPAPI).
-- Le module serveur `sysinfo` côté Dolibarr est le même que pour l'agent Windows (voir `dolibarr_sysinfo_agent_windows/server_module`).
+- Le module serveur `sysinfo` côté Dolibarr est le même que pour l'agent Windows (voir le module [dolibarr_module_sysinfo](https://github.com/BB2A-Anthony/dolibarr_module_sysinfo)).
 
 ## Compatibilité serveur
 
