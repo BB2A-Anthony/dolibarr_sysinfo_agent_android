@@ -84,6 +84,12 @@ Builder.load_string("""
         height: dp(48)
         on_press: root.do_test()
 
+    Button:
+        text: "Verifier la mise a jour"
+        size_hint_y: None
+        height: dp(48)
+        on_press: root.do_check_update()
+
     Label:
         id: status_label
         text: root.status_text
@@ -169,6 +175,55 @@ class AgentLayout(BoxLayout):
         config = load_config(config_path())
         send_report(config)
         return "Rapport envoye avec succes."
+
+    def do_check_update(self):
+        if self._busy:
+            return
+        self._busy = True
+        self.status_text = "Verification de mise a jour..."
+        self._run_bg(lambda: self._check_update())
+
+    def _check_update(self):
+        from agent.updater import apply_update, check_for_update
+
+        config = load_config(config_path())
+        info = check_for_update(config)
+        if not info:
+            return "Aucune mise a jour disponible."
+        apk_path = apply_update(config, info)
+        self._prompt_install(apk_path)
+        return "Mise a jour telechargee : %s. Confirmez l'installation." % info.get("version")
+
+    def _prompt_install(self, apk_path):
+        try:
+            from jnius import autoclass
+
+            Intent = autoclass("android.content.Intent")
+            String = autoclass("java.lang.String")
+            File = autoclass("java.io.File")
+            StrictMode = autoclass("android.os.StrictMode")
+            Uri = autoclass("android.net.Uri")
+
+            StrictModeVmPolicy = autoclass("android.os.StrictMode$VmPolicy")
+            StrictMode.setVmPolicy(StrictModeVmPolicy.Builder().build())
+
+            PythonActivity = autoclass("org.kivy.android.PythonActivity")
+            intent = Intent(Intent.ACTION_VIEW)
+            apk_file = File(String(apk_path))
+            sdk = autoclass("android.os.Build$VERSION").SDK_INT
+            if sdk >= 24:
+                FileProvider = autoclass("android.support.v4.content.FileProvider")
+                uri = FileProvider.getUriForFile(
+                    PythonActivity, PythonActivity.getPackageName() + ".fileprovider", apk_file
+                )
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            else:
+                uri = Uri.fromFile(apk_file)
+            intent.setDataAndType(uri, "application/vnd.android.package-archive")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            PythonActivity.startActivity(intent)
+        except Exception as exc:
+            logger.warning("Installation intent impossible: %s", exc)
 
     def do_test(self):
         if self._busy:

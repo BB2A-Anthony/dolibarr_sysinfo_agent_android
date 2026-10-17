@@ -27,6 +27,14 @@ def main():
             logger.info("Rapport envoye, prochain dans %ss", interval)
         except Exception as exc:
             logger.error("Envoi echoue: %s", exc)
+        try:
+            from agent.updater import apply_update, check_for_update
+
+            info = check_for_update(config)
+            if info:
+                apply_update(config, info)
+        except Exception as exc:
+            logger.error("Auto-update echoue: %s", exc)
         time.sleep(interval)
 
 
